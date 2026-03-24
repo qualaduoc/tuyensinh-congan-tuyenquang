@@ -8,7 +8,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-[#F0F2F5] font-sans text-slate-900 pb-12 flex flex-col">
       {/* Header VNeID Style: Đỏ thẫm viền Vàng */}
-      <header className="bg-gradient-to-r from-[#8B0000] via-[#CD0000] to-[#8B0000] text-white shadow-2xl sticky top-0 z-50 border-b-4 border-yellow-400">
+      <header className="bg-gradient-to-r from-[#8B0000] via-[#CD0000] to-[#8B0000] text-white shadow-2xl md:sticky md:top-0 z-50 border-b-4 border-yellow-400">
         <div className="max-w-7xl mx-auto px-4 py-3 md:py-4 relative">
           
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
