@@ -1,0 +1,459 @@
+import React, { useState, useMemo } from 'react';
+import { 
+  ClipboardList, 
+  PlusCircle, 
+  BarChart3, 
+  Phone, 
+  Calendar,
+  AlertCircle,
+  CheckCircle2,
+  Trash2,
+  Info
+} from 'lucide-react';
+
+const UNITS = [
+  "Công an phường An Tường",
+  "Công an phường Bình Thuận",
+  "Công an phường Hà Giang 1",
+  "Công an phường Hà Giang 2",
+  "Công an phường Minh Xuân",
+  "Công an phường Mỹ Lâm",
+  "Công an phường Nông Tiến",
+  "Công an xã Bắc Mê",
+  "Công an xã Bắc Quang",
+  "Công an xã Bạch Đích",
+  "Công an xã Bạch Ngọc",
+  "Công an xã Bạch Xa"
+];
+
+const FITNESS_FIELDS = [
+  { id: 'run100', label: 'Chạy 100m' },
+  { id: 'run1500', label: 'Chạy 1.500m' },
+  { id: 'pullUp', label: 'Co tay xà đơn' },
+  { id: 'longJump', label: 'Bật xa' }
+];
+
+const App = () => {
+  const [activeTab, setActiveTab] = useState('report');
+  const [entries, setEntries] = useState([]);
+  const [filterDate, setFilterDate] = useState(new Date().toISOString().split('T')[0]);
+  
+  // Form State for batch entry
+  const [formData, setFormData] = useState({
+    unit: '',
+    regDate: new Date().toISOString().split('T')[0],
+    vb2: 0,
+    dai_hoc: 0,
+    trung_cap: 0,
+    lookupSent: 0,
+    run100: 0,
+    run1500: 0,
+    pullUp: 0,
+    longJump: 0,
+    officerPhone: ''
+  });
+
+  const [message, setMessage] = useState(null);
+
+  const handleInputChange = (field, value) => {
+    const numValue = value === '' ? 0 : parseInt(value, 10);
+    setFormData(prev => ({ ...prev, [field]: numValue }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!formData.unit) {
+      setMessage({ type: 'error', text: 'Vui lòng chọn đơn vị.' });
+      return;
+    }
+
+    // Kiểm tra logic: Tổng số lượng vận động không nên vượt quá số lượng thí sinh Đại học 
+    // (Dựa trên mô tả: chỉ thí sinh Đại học mới kiểm tra vận động)
+    const totalFitnessReg = Math.max(formData.run100, formData.run1500, formData.pullUp, formData.longJump);
+    if (totalFitnessReg > formData.dai_hoc) {
+       // Chúng ta cho phép lưu nhưng cảnh báo nếu cần, ở đây tôi chỉ để lưu bình thường theo yêu cầu thực tế
+    }
+
+    const newEntry = {
+      id: Date.now(),
+      ...formData
+    };
+
+    setEntries([...entries, newEntry]);
+    
+    // Reset form but keep unit and date for convenience if entering multiple batches
+    setFormData({
+      ...formData,
+      vb2: 0,
+      dai_hoc: 0,
+      trung_cap: 0,
+      lookupSent: 0,
+      run100: 0,
+      run1500: 0,
+      pullUp: 0,
+      longJump: 0,
+    });
+
+    setMessage({ type: 'success', text: 'Đã cập nhật số lượng thành công!' });
+    setTimeout(() => setMessage(null), 3000);
+  };
+
+  const summaryData = useMemo(() => {
+    const filtered = entries.filter(e => e.regDate === filterDate);
+    
+    return UNITS.map(unit => {
+      const unitEntries = filtered.filter(e => e.unit === unit);
+      return {
+        unit,
+        vb2: unitEntries.reduce((sum, e) => sum + (e.vb2 || 0), 0),
+        dai_hoc: unitEntries.reduce((sum, e) => sum + (e.dai_hoc || 0), 0),
+        trung_cap: unitEntries.reduce((sum, e) => sum + (e.trung_cap || 0), 0),
+        lookupSent: unitEntries.reduce((sum, e) => sum + (e.lookupSent || 0), 0),
+        run100: unitEntries.reduce((sum, e) => sum + (e.run100 || 0), 0),
+        run1500: unitEntries.reduce((sum, e) => sum + (e.run1500 || 0), 0),
+        pullUp: unitEntries.reduce((sum, e) => sum + (e.pullUp || 0), 0),
+        longJump: unitEntries.reduce((sum, e) => sum + (e.longJump || 0), 0),
+        phones: [...new Set(unitEntries.map(e => e.officerPhone).filter(p => p))]
+      };
+    });
+  }, [entries, filterDate]);
+
+  const totalAll = useMemo(() => {
+    return summaryData.reduce((acc, row) => ({
+      vb2: acc.vb2 + row.vb2,
+      dai_hoc: acc.dai_hoc + row.dai_hoc,
+      trung_cap: acc.trung_cap + row.trung_cap,
+      lookupSent: acc.lookupSent + row.lookupSent,
+      run100: acc.run100 + row.run100,
+      run1500: acc.run1500 + row.run1500,
+      pullUp: acc.pullUp + row.pullUp,
+      longJump: acc.longJump + row.longJump,
+    }), { vb2: 0, dai_hoc: 0, trung_cap: 0, lookupSent: 0, run100: 0, run1500: 0, pullUp: 0, longJump: 0 });
+  }, [summaryData]);
+
+  return (
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-900 pb-12">
+      {/* Header */}
+      <header className="bg-red-700 text-white shadow-lg sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <h1 className="text-xl font-bold flex items-center gap-2">
+              <ClipboardList className="w-6 h-6" />
+              QUẢN LÝ SỐ LIỆU TUYỂN SINH CÔNG AN
+            </h1>
+            <div className="flex bg-red-800 rounded-lg p-1 border border-red-600">
+              <button 
+                onClick={() => setActiveTab('form')}
+                className={`px-5 py-2 rounded-md flex items-center gap-2 text-sm font-medium transition-all ${activeTab === 'form' ? 'bg-white text-red-700 shadow-sm' : 'text-red-100 hover:bg-red-700'}`}
+              >
+                <PlusCircle className="w-4 h-4" /> Nhập số liệu
+              </button>
+              <button 
+                onClick={() => setActiveTab('report')}
+                className={`px-5 py-2 rounded-md flex items-center gap-2 text-sm font-medium transition-all ${activeTab === 'report' ? 'bg-white text-red-700 shadow-sm' : 'text-red-100 hover:bg-red-700'}`}
+              >
+                <BarChart3 className="w-4 h-4" /> Báo cáo tổng hợp
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-7xl mx-auto px-4 py-8">
+        {message && (
+          <div className={`mb-6 p-4 rounded-lg flex items-center gap-3 shadow-md animate-bounce-short ${message.type === 'success' ? 'bg-green-50 text-green-800 border-l-4 border-green-500' : 'bg-red-50 text-red-800 border-l-4 border-red-500'}`}>
+            {message.type === 'success' ? <CheckCircle2 className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
+            <span className="font-medium">{message.text}</span>
+          </div>
+        )}
+
+        {activeTab === 'form' ? (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Form Side */}
+            <section className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+              <div className="bg-slate-50 px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+                <h2 className="text-lg font-bold text-slate-700 flex items-center gap-2">
+                  <PlusCircle className="w-5 h-5 text-red-600" />
+                  Cập nhật số lượng đăng ký mới
+                </h2>
+              </div>
+              <form onSubmit={handleSubmit} className="p-6 space-y-8">
+                {/* Cơ bản */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-slate-600">Đơn vị</label>
+                    <select 
+                      required
+                      value={formData.unit}
+                      onChange={(e) => setFormData({...formData, unit: e.target.value})}
+                      className="w-full p-3 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-500 outline-none transition-all"
+                    >
+                      <option value="">-- Chọn đơn vị --</option>
+                      {UNITS.map(unit => <option key={unit} value={unit}>{unit}</option>)}
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-slate-600">Ngày báo cáo</label>
+                    <input 
+                      type="date"
+                      value={formData.regDate}
+                      onChange={(e) => setFormData({...formData, regDate: e.target.value})}
+                      className="w-full p-3 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-500 outline-none transition-all"
+                    />
+                  </div>
+                </div>
+
+                {/* Số lượng loại hình */}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                    <div className="h-px flex-1 bg-slate-200"></div>
+                    Số lượng thí sinh đăng ký
+                    <div className="h-px flex-1 bg-slate-200"></div>
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-100">
+                      <label className="block text-xs font-bold text-blue-700 mb-2 uppercase">Văn bằng 2</label>
+                      <input 
+                        type="number" min="0"
+                        value={formData.vb2 || ''}
+                        onChange={(e) => handleInputChange('vb2', e.target.value)}
+                        className="w-full p-2 text-lg font-bold text-center rounded-lg border border-blue-200 focus:ring-2 focus:ring-blue-500 outline-none"
+                      />
+                    </div>
+                    <div className="bg-red-50/50 p-4 rounded-xl border border-red-100">
+                      <label className="block text-xs font-bold text-red-700 mb-2 uppercase">Đại học (Mới)</label>
+                      <input 
+                        type="number" min="0"
+                        value={formData.dai_hoc || ''}
+                        onChange={(e) => handleInputChange('dai_hoc', e.target.value)}
+                        className="w-full p-2 text-lg font-bold text-center rounded-lg border border-red-200 focus:ring-2 focus:ring-red-500 outline-none"
+                      />
+                    </div>
+                    <div className="bg-amber-50/50 p-4 rounded-xl border border-amber-100">
+                      <label className="block text-xs font-bold text-amber-700 mb-2 uppercase">Trung cấp (Mới)</label>
+                      <input 
+                        type="number" min="0"
+                        value={formData.trung_cap || ''}
+                        onChange={(e) => handleInputChange('trung_cap', e.target.value)}
+                        className="w-full p-2 text-lg font-bold text-center rounded-lg border border-amber-200 focus:ring-2 focus:ring-amber-500 outline-none"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Kiểm tra vận động */}
+                <div className="space-y-4">
+                   <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2 flex-1">
+                      <div className="h-px flex-1 bg-slate-200"></div>
+                      Kiểm tra vận động (Chỉ cho Đại học)
+                      <div className="h-px flex-1 bg-slate-200"></div>
+                    </h3>
+                  </div>
+                  
+                  {formData.dai_hoc === 0 && (
+                    <div className="flex items-center gap-2 p-3 bg-slate-100 text-slate-500 rounded-lg text-xs italic">
+                      <Info className="w-4 h-4" /> Nhập số lượng thí sinh Đại học trước khi nhập phần vận động.
+                    </div>
+                  )}
+
+                  <div className={`grid grid-cols-2 md:grid-cols-4 gap-4 transition-opacity ${formData.dai_hoc === 0 ? 'opacity-50 pointer-events-none' : ''}`}>
+                    {FITNESS_FIELDS.map(field => (
+                      <div key={field.id} className="space-y-2">
+                        <label className="block text-xs font-medium text-slate-600">{field.label}</label>
+                        <input 
+                          type="number" min="0" max={formData.dai_hoc}
+                          value={formData[field.id] || ''}
+                          onChange={(e) => handleInputChange(field.id, e.target.value)}
+                          className={`w-full p-2 text-center rounded-lg border outline-none focus:ring-2 focus:ring-red-500 ${formData[field.id] > formData.dai_hoc ? 'border-red-500 bg-red-50 text-red-600' : 'border-slate-200'}`}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  {formData.dai_hoc > 0 && (
+                    <p className="text-[10px] text-slate-400 italic">Lưu ý: Thí sinh Đại học tối đa là {formData.dai_hoc}, số lượng đăng ký vận động không nên vượt quá con số này.</p>
+                  )}
+                </div>
+
+                {/* Khác */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-slate-100">
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-slate-600 uppercase">Đã gửi tra cứu</label>
+                    <input 
+                      type="number" min="0"
+                      value={formData.lookupSent || ''}
+                      onChange={(e) => handleInputChange('lookupSent', e.target.value)}
+                      className="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-500 outline-none"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-slate-600 uppercase">SĐT Cán bộ phụ trách</label>
+                    <div className="relative">
+                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                      <input 
+                        type="tel"
+                        value={formData.officerPhone}
+                        onChange={(e) => setFormData({...formData, officerPhone: e.target.value})}
+                        className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-500 outline-none"
+                        placeholder="Nhập SĐT..."
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <button 
+                  type="submit"
+                  className="w-full py-4 bg-red-700 text-white font-bold rounded-xl hover:bg-red-800 shadow-lg shadow-red-200 transition-all active:scale-95 flex items-center justify-center gap-2"
+                >
+                  <PlusCircle className="w-5 h-5" /> CẬP NHẬT DỮ LIỆU
+                </button>
+              </form>
+            </section>
+
+            {/* Sidebar Stats */}
+            <aside className="space-y-6">
+              <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <h3 className="font-bold text-slate-700 mb-4">Hướng dẫn</h3>
+                <ul className="text-sm text-slate-600 space-y-3">
+                  <li className="flex gap-2">
+                    <span className="bg-red-100 text-red-700 w-5 h-5 rounded-full flex items-center justify-center text-[10px] flex-shrink-0">1</span>
+                    Nhập số lượng thí sinh vào từng ô tương ứng.
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="bg-red-100 text-red-700 w-5 h-5 rounded-full flex items-center justify-center text-[10px] flex-shrink-0">2</span>
+                    Chỉ thí sinh <strong>Đại học</strong> mới tham gia kiểm tra vận động.
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="bg-red-100 text-red-700 w-5 h-5 rounded-full flex items-center justify-center text-[10px] flex-shrink-0">3</span>
+                    Hệ thống sẽ tự động cộng dồn số liệu vào bảng tổng hợp.
+                  </li>
+                </ul>
+              </div>
+            </aside>
+          </div>
+        ) : (
+          <section className="space-y-6 animate-in fade-in duration-500">
+            {/* Filters */}
+            <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="relative">
+                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <input 
+                    type="date"
+                    value={filterDate}
+                    onChange={(e) => setFilterDate(e.target.value)}
+                    className="pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-red-500 transition-all cursor-pointer"
+                  />
+                </div>
+                <div className="h-8 w-px bg-slate-200"></div>
+                <div className="text-sm font-medium text-slate-500">
+                  Thống kê ngày: <span className="text-slate-900 font-bold">{new Date(filterDate).toLocaleDateString('vi-VN')}</span>
+                </div>
+              </div>
+              
+              <button 
+                onClick={() => setEntries([])}
+                className="px-4 py-2 text-xs font-bold text-red-500 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-2 no-print"
+              >
+                <Trash2 className="w-4 h-4" /> Xóa toàn bộ dữ liệu
+              </button>
+            </div>
+
+            {/* Main Report Table */}
+            <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden overflow-x-auto">
+              <table className="w-full border-collapse text-xs">
+                <thead>
+                  <tr className="bg-slate-800 text-white uppercase tracking-wider font-bold">
+                    <th rowSpan="3" className="border-r border-slate-700 p-4 min-w-[220px]">Đơn vị</th>
+                    <th colSpan="3" className="border-r border-slate-700 p-3 text-center">Số lượng thí sinh đăng ký</th>
+                    <th rowSpan="3" className="border-r border-slate-700 p-3 text-center">Đã gửi tra cứu</th>
+                    <th colSpan="4" className="border-r border-slate-700 p-3 text-center">Kiểm tra vận động</th>
+                    <th rowSpan="3" className="p-3 text-center min-w-[160px]">SĐT CÁN BỘ TỔ CHỨC TUYỂN SINH</th>
+                  </tr>
+                  <tr className="bg-slate-700 text-white font-bold">
+                    <th rowSpan="2" className="border-r border-slate-600 p-3 text-center">VĂN BẰNG 2</th>
+                    <th colSpan="2" className="border-r border-slate-600 p-3 text-center">TUYỂN SINH TUYỂN MỚI</th>
+                    <th rowSpan="2" className="border-r border-slate-600 p-3 text-center">Chạy 100m</th>
+                    <th rowSpan="2" className="border-r border-slate-600 p-3 text-center">Chạy 1.500m</th>
+                    <th rowSpan="2" className="border-r border-slate-600 p-3 text-center">Co tay xà đơn</th>
+                    <th rowSpan="2" className="border-r border-slate-600 p-3 text-center">Bật xa</th>
+                  </tr>
+                  <tr className="bg-slate-600 text-white font-bold">
+                    <th className="border-r border-slate-500 p-2 text-center">ĐẠI HỌC</th>
+                    <th className="border-r border-slate-500 p-2 text-center">TRUNG CẤP</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {summaryData.map((row, idx) => (
+                    <tr key={idx} className={`hover:bg-red-50/50 transition-colors ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/30'}`}>
+                      <td className="border px-4 py-3 font-bold text-slate-800">{row.unit}</td>
+                      <td className="border px-2 py-3 text-center font-bold text-blue-600">{row.vb2 || ''}</td>
+                      <td className="border px-2 py-3 text-center font-bold text-red-600">{row.dai_hoc || ''}</td>
+                      <td className="border px-2 py-3 text-center font-bold text-amber-600">{row.trung_cap || ''}</td>
+                      <td className="border px-2 py-3 text-center text-slate-600">{row.lookupSent || ''}</td>
+                      <td className="border px-2 py-3 text-center text-slate-600">{row.run100 || ''}</td>
+                      <td className="border px-2 py-3 text-center text-slate-600">{row.run1500 || ''}</td>
+                      <td className="border px-2 py-3 text-center text-slate-600">{row.pullUp || ''}</td>
+                      <td className="border px-2 py-3 text-center text-slate-600">{row.longJump || ''}</td>
+                      <td className="border px-4 py-3 text-center text-[10px] text-slate-500">
+                        {row.phones.join(', ')}
+                      </td>
+                    </tr>
+                  ))}
+                  {/* Totals Row */}
+                  <tr className="bg-slate-100 font-bold text-slate-900 border-t-2 border-slate-300">
+                    <td className="border px-4 py-5 uppercase text-sm">Tổng cộng toàn tỉnh</td>
+                    <td className="border px-2 py-5 text-center text-lg text-blue-700">{totalAll.vb2}</td>
+                    <td className="border px-2 py-5 text-center text-lg text-red-700">{totalAll.dai_hoc}</td>
+                    <td className="border px-2 py-5 text-center text-lg text-amber-700">{totalAll.trung_cap}</td>
+                    <td className="border px-2 py-5 text-center text-lg">{totalAll.lookupSent}</td>
+                    <td className="border px-2 py-5 text-center text-lg">{totalAll.run100}</td>
+                    <td className="border px-2 py-5 text-center text-lg">{totalAll.run1500}</td>
+                    <td className="border px-2 py-5 text-center text-lg">{totalAll.pullUp}</td>
+                    <td className="border px-2 py-5 text-center text-lg">{totalAll.longJump}</td>
+                    <td className="border px-4 py-5 text-center text-slate-300">---</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            
+            <div className="flex justify-end gap-3 no-print">
+              <button 
+                onClick={() => window.print()}
+                className="px-8 py-3 bg-red-700 text-white font-bold rounded-xl flex items-center gap-2 hover:bg-red-800 transition-all shadow-lg active:scale-95"
+              >
+                <ClipboardList className="w-5 h-5" /> IN BÁO CÁO TỔNG HỢP
+              </button>
+            </div>
+          </section>
+        )}
+      </main>
+
+      {/* Print Styles */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        @media print {
+          .no-print { display: none !important; }
+          body { background: white; margin: 0; padding: 0; }
+          main { padding: 0; max-width: 100%; }
+          .shadow-xl, .shadow-sm { box-shadow: none !important; border: 1px solid #000 !important; }
+          table { width: 100% !important; border-collapse: collapse !important; border: 1px solid black !important; }
+          th, td { border: 1px solid black !important; padding: 4px !important; font-size: 8pt !important; color: black !important; }
+          thead { display: table-header-group; }
+          tr { page-break-inside: avoid; }
+          header { background: white !important; color: black !important; padding: 10px 0 !important; border-bottom: 2px solid black; }
+          h1 { font-size: 14pt !important; text-align: center; }
+          .bg-slate-800, .bg-slate-700, .bg-slate-600 { background: #eee !important; color: black !important; }
+        }
+        @keyframes bounce-short {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-5px); }
+        }
+        .animate-bounce-short {
+          animation: bounce-short 0.5s ease-in-out 1;
+        }
+      `}} />
+    </div>
+  );
+};
+
+export default App;
