@@ -72,7 +72,7 @@ export default function AdminPage() {
       <footer className="w-full text-center py-6 mt-8 border-t border-slate-300 text-slate-500 text-xs md:text-sm font-semibold relative overflow-hidden bg-white no-print">
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-yellow-400 via-red-600 to-yellow-400"></div>
         <p>Bản quyền © 2026 thuộc về Công An Tỉnh Tuyên Quang.</p>
-        <p className="mt-1 opacity-70">Phát triển và bảo mật bởi Tổ Phát Triển Ứng Dụng Khởi sắc.</p>
+        <p className="mt-1 opacity-70">Phát triển và bảo mật bởi <a href="https://zalo.me/0982612007" target="_blank" rel="noopener noreferrer" className="text-red-600 hover:text-red-800 underline font-bold">Siêu Việt Tuyên Quang</a></p>
       </footer>
     </div>
   );
