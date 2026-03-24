@@ -211,7 +211,7 @@ export default function FormNhapLieu() {
             <div className="space-y-2">
               <label className="text-[11px] font-black text-red-900 uppercase tracking-widest">Đã Gửi Tra Cứu</label>
               <input 
-                type="number" min="0" required
+                type="number" min="0"
                 value={formData.lookupSent === 0 ? '' : formData.lookupSent}
                 onChange={(e) => handleInputChange('lookupSent', e.target.value)}
                 className="w-full p-3.5 text-lg font-bold border-2 border-red-300 rounded-xl focus:border-red-600 outline-none bg-white text-red-900"
