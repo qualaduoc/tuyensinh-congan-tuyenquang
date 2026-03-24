@@ -140,7 +140,7 @@ export default function FormNhapLieu() {
                 <div className="absolute top-0 left-0 w-2 h-full bg-blue-500"></div>
                 <label className="block text-xs font-black text-slate-500 mb-3 uppercase tracking-wider pl-4">Văn Bằng 2</label>
                 <input 
-                  type="number" min="0" required
+                  type="number" min="0"
                   value={formData.vb2 === 0 ? '' : formData.vb2}
                   onChange={(e) => handleInputChange('vb2', e.target.value)}
                   className="w-full pl-4 p-3 text-2xl font-black text-slate-800 bg-white rounded-xl border-2 border-slate-300 focus:border-blue-500 outline-none shadow-sm"
@@ -152,7 +152,7 @@ export default function FormNhapLieu() {
                 <div className="absolute top-0 left-0 w-2 h-full bg-red-600"></div>
                 <label className="block text-xs font-black text-red-800 mb-3 uppercase tracking-wider pl-4">Đại Học Mới</label>
                 <input 
-                  type="number" min="0" required
+                  type="number" min="0"
                   value={formData.dai_hoc === 0 ? '' : formData.dai_hoc}
                   onChange={(e) => handleInputChange('dai_hoc', e.target.value)}
                   className="w-full pl-4 p-3 text-2xl font-black text-red-700 bg-white rounded-xl border-2 border-red-300 focus:border-red-500 outline-none shadow-sm"
@@ -164,7 +164,7 @@ export default function FormNhapLieu() {
                 <div className="absolute top-0 left-0 w-2 h-full bg-amber-500"></div>
                 <label className="block text-xs font-black text-slate-500 mb-3 uppercase tracking-wider pl-4">Trung Cấp Mới</label>
                 <input 
-                  type="number" min="0" required
+                  type="number" min="0"
                   value={formData.trung_cap === 0 ? '' : formData.trung_cap}
                   onChange={(e) => handleInputChange('trung_cap', e.target.value)}
                   className="w-full pl-4 p-3 text-2xl font-black text-slate-800 bg-white rounded-xl border-2 border-slate-300 focus:border-amber-500 outline-none shadow-sm"
