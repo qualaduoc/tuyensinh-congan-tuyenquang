@@ -24,6 +24,7 @@ export default function FormNhapLieu() {
     trung_cap: 0,
     lookupSent: 0,
     run100: 0,
+    run800: 0,
     run1500: 0,
     pullUp: 0,
     longJump: 0,
@@ -58,6 +59,7 @@ export default function FormNhapLieu() {
           trung_cap: formData.trung_cap,
           lookup_sent: formData.lookupSent,
           run100: formData.run100,
+          run800: formData.run800,
           run1500: formData.run1500,
           pull_up: formData.pullUp,
           long_jump: formData.longJump,
@@ -74,7 +76,7 @@ export default function FormNhapLieu() {
       setFormData({
         ...formData,
         vb2: 0, dai_hoc: 0, trung_cap: 0, lookupSent: 0,
-        run100: 0, run1500: 0, pullUp: 0, longJump: 0,
+        run100: 0, run800: 0, run1500: 0, pullUp: 0, longJump: 0,
       });
 
       setTimeout(() => setMessage(null), 3000);
@@ -188,7 +190,7 @@ export default function FormNhapLieu() {
               </div>
             )}
 
-            <div className={`grid grid-cols-2 lg:grid-cols-4 gap-4 transition-all duration-300 ${formData.dai_hoc === 0 ? 'opacity-30 pointer-events-none grayscale' : ''}`}>
+            <div className={`grid grid-cols-2 lg:grid-cols-5 gap-4 transition-all duration-300 ${formData.dai_hoc === 0 ? 'opacity-30 pointer-events-none grayscale' : ''}`}>
               {FITNESS_FIELDS.map(field => (
                 <div key={field.id} className="bg-slate-50 p-4 rounded-2xl border-2 border-slate-300 shadow-sm relative">
                   <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">{field.label}</label>

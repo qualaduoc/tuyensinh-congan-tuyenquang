@@ -153,6 +153,7 @@ export const UNITS = [
 
 export const FITNESS_FIELDS = [
   { id: 'run100', label: 'Chạy 100m' },
+  { id: 'run800', label: 'Chạy 800m' },
   { id: 'run1500', label: 'Chạy 1.500m' },
   { id: 'pullUp', label: 'Co tay xà đơn' },
   { id: 'longJump', label: 'Bật xa' }

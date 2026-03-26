@@ -62,6 +62,7 @@ export default function BangThongKe() {
         trung_cap: unitEntries.reduce((sum, e) => sum + (e.trung_cap || 0), 0),
         lookupSent: unitEntries.reduce((sum, e) => sum + (e.lookup_sent || 0), 0),
         run100: unitEntries.reduce((sum, e) => sum + (e.run100 || 0), 0),
+        run800: unitEntries.reduce((sum, e) => sum + (e.run800 || 0), 0),
         run1500: unitEntries.reduce((sum, e) => sum + (e.run1500 || 0), 0),
         pullUp: unitEntries.reduce((sum, e) => sum + (e.pull_up || 0), 0),
         longJump: unitEntries.reduce((sum, e) => sum + (e.long_jump || 0), 0),
@@ -77,10 +78,11 @@ export default function BangThongKe() {
       trung_cap: acc.trung_cap + row.trung_cap,
       lookupSent: acc.lookupSent + row.lookupSent,
       run100: acc.run100 + row.run100,
+      run800: acc.run800 + row.run800,
       run1500: acc.run1500 + row.run1500,
       pullUp: acc.pullUp + row.pullUp,
       longJump: acc.longJump + row.longJump,
-    }), { vb2: 0, dai_hoc: 0, trung_cap: 0, lookupSent: 0, run100: 0, run1500: 0, pullUp: 0, longJump: 0 });
+    }), { vb2: 0, dai_hoc: 0, trung_cap: 0, lookupSent: 0, run100: 0, run800: 0, run1500: 0, pullUp: 0, longJump: 0 });
   }, [summaryData]);
 
   const handleExportExcel = () => {
@@ -88,11 +90,11 @@ export default function BangThongKe() {
       ["BÁO CÁO TUYỂN SINH CÔNG AN TỈNH TUYÊN QUANG"],
       [`Bộ lọc: ${filterType === 'day' ? 'Ngày' : filterType === 'week' ? 'Tuần' : 'Tháng'} - Thời điểm: ${filterDate}`],
       [],
-      ["Đơn vị", "Văn Bằng 2", "Đại Học", "Trung Cấp", "Đã gửi tra cứu", "Chạy 100m", "Chạy 1.500m", "Co tay xà đơn", "Bật xa", "SĐT CÁN BỘ"],
+      ["Đơn vị", "Văn Bằng 2", "Đại Học", "Trung Cấp", "Đã gửi tra cứu", "Chạy 100m", "Chạy 800m", "Chạy 1.500m", "Co tay xà đơn", "Bật xa", "SĐT CÁN BỘ"],
       ...summaryData.map(row => [
-        row.unit, row.vb2, row.dai_hoc, row.trung_cap, row.lookupSent, row.run100, row.run1500, row.pullUp, row.longJump, row.phones.join(', ')
+        row.unit, row.vb2, row.dai_hoc, row.trung_cap, row.lookupSent, row.run100, row.run800, row.run1500, row.pullUp, row.longJump, row.phones.join(', ')
       ]),
-      ["TỔNG CỘNG TOÀN TỈNH", totalAll.vb2, totalAll.dai_hoc, totalAll.trung_cap, totalAll.lookupSent, totalAll.run100, totalAll.run1500, totalAll.pullUp, totalAll.longJump, ""]
+      ["TỔNG CỘNG TOÀN TỈNH", totalAll.vb2, totalAll.dai_hoc, totalAll.trung_cap, totalAll.lookupSent, totalAll.run100, totalAll.run800, totalAll.run1500, totalAll.pullUp, totalAll.longJump, ""]
     ];
 
     const ws = XLSX.utils.aoa_to_sheet(wsData);
@@ -167,13 +169,14 @@ export default function BangThongKe() {
               <th rowSpan={3} className="border border-red-900/50 p-3 text-left">Đơn vị</th>
               <th colSpan={3} className="border border-red-900/50 p-2 text-center">Số lượng đăng ký</th>
               <th rowSpan={3} className="border border-red-900/50 p-2 text-center bg-[#5B0000] !text-white">Tra cứu</th>
-              <th colSpan={4} className="border border-red-900/50 p-2 text-center">Kiểm tra vận động</th>
+              <th colSpan={5} className="border border-red-900/50 p-2 text-center">Kiểm tra vận động</th>
               <th rowSpan={3} className="border border-red-900/50 p-2 text-center">SĐT</th>
             </tr>
             <tr className="bg-[#A30000] text-white font-black text-[10px] tracking-widest">
               <th rowSpan={2} className="border border-red-900/50 p-2 text-center text-blue-200">VB2</th>
               <th colSpan={2} className="border border-red-900/50 p-2 text-center bg-[#8B0000]">Tuyển mới</th>
               <th rowSpan={2} className="border border-red-900/50 p-2 text-center">100m</th>
+              <th rowSpan={2} className="border border-red-900/50 p-2 text-center">800m</th>
               <th rowSpan={2} className="border border-red-900/50 p-2 text-center">1500m</th>
               <th rowSpan={2} className="border border-red-900/50 p-2 text-center">Xà đơn</th>
               <th rowSpan={2} className="border border-red-900/50 p-2 text-center">Bật xa</th>
@@ -193,6 +196,7 @@ export default function BangThongKe() {
                 <td className="border px-2 py-2.5 text-center font-black text-amber-600">{row.trung_cap || ''}</td>
                 <td className="border px-2 py-2.5 text-center text-slate-500 font-semibold bg-[#FAFAFA]">{row.lookupSent || ''}</td>
                 <td className="border px-2 py-2.5 text-center text-slate-600">{row.run100 || ''}</td>
+                <td className="border px-2 py-2.5 text-center text-slate-600">{row.run800 || ''}</td>
                 <td className="border px-2 py-2.5 text-center text-slate-600">{row.run1500 || ''}</td>
                 <td className="border px-2 py-2.5 text-center text-slate-600">{row.pullUp || ''}</td>
                 <td className="border px-2 py-2.5 text-center text-slate-600">{row.longJump || ''}</td>
@@ -211,6 +215,7 @@ export default function BangThongKe() {
               <td className="border px-2 py-4 text-center text-lg text-orange-900">{totalAll.trung_cap}</td>
               <td className="border px-2 py-4 text-center text-lg">{totalAll.lookupSent}</td>
               <td className="border px-2 py-4 text-center">{totalAll.run100}</td>
+              <td className="border px-2 py-4 text-center">{totalAll.run800}</td>
               <td className="border px-2 py-4 text-center">{totalAll.run1500}</td>
               <td className="border px-2 py-4 text-center">{totalAll.pullUp}</td>
               <td className="border px-2 py-4 text-center">{totalAll.longJump}</td>
@@ -269,8 +274,9 @@ export default function BangThongKe() {
           .print-table th:nth-child(7),
           .print-table th:nth-child(8),
           .print-table th:nth-child(9),
-          .print-table th:nth-child(10) { width: 6% !important; } /* Số liệu */
-          .print-table th:last-child { width: 12% !important; }    /* SĐT */
+          .print-table th:nth-child(10),
+          .print-table th:nth-child(11) { width: 5.5% !important; } /* Số liệu */
+          .print-table th:last-child { width: 11% !important; }    /* SĐT */
 
           /* Ô bảng: viền đen rõ, padding nhỏ gọn */
           .print-table th,
