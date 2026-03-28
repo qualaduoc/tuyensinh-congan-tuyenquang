@@ -74,6 +74,15 @@ const AdminDangKyManager = () => {
     "CA4 (Địa lí)"
   ];
 
+  const DANH_SACH_DAN_TOC = [
+    "Kinh", "Tày", "Thái", "Mường", "Khmer", "Hoa", "Nùng", "H'Mông", "Dao", "Gia Rai", 
+    "Ê Đê", "Ba Na", "Sán Chay", "Chăm", "Cơ Ho", "Xơ Đăng", "Sán Dìu", "Hrê", "Ra Glai", 
+    "Mnông", "Thổ", "Xtiêng", "Khơ Mú", "Bru - Vân Kiều", "Giáy", "Cơ Tu", "Giẻ - Triêng", 
+    "Ta Ôi", "Mạ", "Co", "Chơ Ro", "Hà Nhì", "Xinh Mun", "Chu Ru", "Lào", "Kháng", "La Chí", 
+    "Phù Lá", "La Hủ", "La Ha", "Pà Thẻn", "Lự", "Ngái", "Chứt", "Lô Lô", "Mảng", "Cơ Lao", 
+    "Bố Y", "Cống", "Si La", "Pu Péo", "Rơ Măm", "Brâu", "Ơ Đu"
+  ];
+
   const [formData, setFormData] = useState<any>(null);
 
   useEffect(() => {
@@ -331,8 +340,8 @@ const AdminDangKyManager = () => {
                 <p className="text-3xl font-black text-slate-900 mt-1">{stats.male}</p>
               </div>
               <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm border-l-4 border-l-emerald-500">
-                <p className="text-sm font-bold text-slate-500 uppercase">Hệ HSPT</p>
-                <p className="text-3xl font-black text-slate-900 mt-1">{stats.byCandidateType['HSPT'] || 0}</p>
+                <p className="text-sm font-bold text-slate-500 uppercase">Học sinh PT</p>
+                <p className="text-3xl font-black text-slate-900 mt-1">{stats.byCandidateType['Học sinh phổ thông'] || 0}</p>
               </div>
             </div>
 
@@ -423,6 +432,21 @@ const AdminDangKyManager = () => {
                       <option value="Nam">Nam</option><option value="Nữ">Nữ</option>
                     </select>
                   </div>
+                  <div className="space-y-1 md:col-span-2">
+                    <label className="text-sm font-medium text-slate-700">5. Nơi thường trú <span className="font-normal italic text-slate-500">(Địa chỉ theo CCCD)</span></label>
+                    <input type="text" required className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 outline-none" value={formData.address || ''} onChange={(e) => setFormData({...formData, address: e.target.value})} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm font-medium text-slate-700">6. Dân tộc</label>
+                    <UnitSearchSelect
+                      units={DANH_SACH_DAN_TOC}
+                      value={formData.ethnicity || ''}
+                      onChange={(val) => setFormData({...formData, ethnicity: val})}
+                      placeholder="-- Chọn Dân tộc --"
+                      searchPlaceholder="Gõ chữ cái đầu (VD: Ki...)"
+                      emptyText="Không tìm thấy tên dân tộc"
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -434,9 +458,9 @@ const AdminDangKyManager = () => {
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                    <div className="space-y-1">
-                    <label className="text-sm font-medium text-slate-700">5. Đối tượng</label>
+                    <label className="text-sm font-medium text-slate-700">7. Đối tượng</label>
                     <select className="w-full p-2 border border-slate-300 rounded-lg outline-none" value={formData.candidateType} onChange={(e) => setFormData({...formData, candidateType: e.target.value})}>
-                      <option>HSPT</option><option>CSNV tại ngũ</option><option>CSNV xuất ngũ</option>
+                      <option>Học sinh phổ thông</option><option>CSNV tại ngũ</option><option>CSNV xuất ngũ</option>
                     </select>
                   </div>
                   <div className="space-y-1">
@@ -554,7 +578,7 @@ const AdminDangKyManager = () => {
                   <p className="w-[40%]"><span className="font-normal">4. Giới tính:</span> <span className="font-bold bg-yellow-100 print:bg-transparent">{selectedReg.gender}</span></p>
                 </div>
 
-                <p><span className="font-normal">5. Đối tượng (<span className="italic">HSPT, CSNV tại ngũ, CSNV xuất ngũ</span>):</span> <span className="font-bold bg-yellow-100 print:bg-transparent">{selectedReg.candidateType}</span></p>
+                <p><span className="font-normal">5. Đối tượng (<span className="italic">Học sinh phổ thông, CSNV tại ngũ, CSNV xuất ngũ</span>):</span> <span className="font-bold bg-yellow-100 print:bg-transparent">{selectedReg.candidateType}</span></p>
                 <p><span className="font-normal">6. Phương thức dự tuyển:</span> <span className="font-bold bg-yellow-100 print:bg-transparent">{selectedReg.method}</span></p>
                 <p><span className="font-normal">7. Đăng ký xét tuyển đại học:</span> <span className="font-bold bg-yellow-100 print:bg-transparent">{selectedReg.uniChoice}</span></p>
                 <p><span className="font-normal">8. Đăng ký xét tuyển trung cấp:</span> <span className="font-bold bg-yellow-100 print:bg-transparent">{selectedReg.collegeChoice}</span></p>

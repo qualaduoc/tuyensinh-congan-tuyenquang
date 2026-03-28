@@ -63,6 +63,15 @@ const FormDangKyTuyenSinh = () => {
     "CA4 (Địa lí)"
   ];
 
+  const DANH_SACH_DAN_TOC = [
+    "Kinh", "Tày", "Thái", "Mường", "Khmer", "Hoa", "Nùng", "H'Mông", "Dao", "Gia Rai", 
+    "Ê Đê", "Ba Na", "Sán Chay", "Chăm", "Cơ Ho", "Xơ Đăng", "Sán Dìu", "Hrê", "Ra Glai", 
+    "Mnông", "Thổ", "Xtiêng", "Khơ Mú", "Bru - Vân Kiều", "Giáy", "Cơ Tu", "Giẻ - Triêng", 
+    "Ta Ôi", "Mạ", "Co", "Chơ Ro", "Hà Nhì", "Xinh Mun", "Chu Ru", "Lào", "Kháng", "La Chí", 
+    "Phù Lá", "La Hủ", "La Ha", "Pà Thẻn", "Lự", "Ngái", "Chứt", "Lô Lô", "Mảng", "Cơ Lao", 
+    "Bố Y", "Cống", "Si La", "Pu Péo", "Rơ Măm", "Brâu", "Ơ Đu"
+  ];
+
   // Initial Form State
   const initialForm = {
     id: Date.now(),
@@ -71,7 +80,9 @@ const FormDangKyTuyenSinh = () => {
     dob: '',
     cccd: '',
     gender: 'Nam',
-    candidateType: 'HSPT',
+    address: '',
+    ethnicity: '',
+    candidateType: 'Học sinh phổ thông',
     method: 'Phương thức 2 và Phương thức 3',
     uniChoice: 'Học viện An ninh nhân dân (T01) - ANH',
     collegeChoice: 'Trường CĐ An ninh nhân dân I (T08) - ANN',
@@ -202,6 +213,21 @@ const FormDangKyTuyenSinh = () => {
                       <option value="Nữ">Nữ</option>
                     </select>
                   </div>
+                  <div className="space-y-1 md:col-span-2">
+                    <label className="text-sm font-medium text-slate-700">5. Nơi thường trú <span className="font-normal italic text-slate-500">(Địa chỉ theo CCCD)</span> <span className="text-red-500">*</span></label>
+                    <input type="text" required placeholder="Ví dụ: Thôn A, Xã B, Huyện C, Tỉnh Tuyên Quang" className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#8B0000] outline-none" value={formData.address} onChange={(e) => setFormData({...formData, address: e.target.value})} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm font-medium text-slate-700">6. Dân tộc <span className="text-red-500">*</span></label>
+                    <UnitSearchSelect
+                      units={DANH_SACH_DAN_TOC}
+                      value={formData.ethnicity}
+                      onChange={(val) => setFormData({...formData, ethnicity: val})}
+                      placeholder="-- Chọn Dân tộc --"
+                      searchPlaceholder="Gõ chữ cái đầu (VD: Ki...)"
+                      emptyText="Không tìm thấy tên dân tộc"
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -213,9 +239,9 @@ const FormDangKyTuyenSinh = () => {
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                    <div className="space-y-1">
-                    <label className="text-sm font-medium text-slate-700">5. Đối tượng</label>
+                    <label className="text-sm font-medium text-slate-700">7. Đối tượng</label>
                     <select className="w-full p-2.5 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-[#8B0000]" value={formData.candidateType} onChange={(e) => setFormData({...formData, candidateType: e.target.value})}>
-                      <option>HSPT</option>
+                      <option>Học sinh phổ thông</option>
                       <option>CSNV tại ngũ</option>
                       <option>CSNV xuất ngũ</option>
                     </select>

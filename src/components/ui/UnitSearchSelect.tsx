@@ -7,9 +7,19 @@ interface UnitSearchSelectProps {
   units: string[];
   value: string;
   onChange: (value: string) => void;
+  placeholder?: string;
+  searchPlaceholder?: string;
+  emptyText?: string;
 }
 
-export default function UnitSearchSelect({ units, value, onChange }: UnitSearchSelectProps) {
+export default function UnitSearchSelect({ 
+  units, 
+  value, 
+  onChange,
+  placeholder = '-- Chọn đơn vị báo cáo --',
+  searchPlaceholder = 'Gõ tên để tìm...',
+  emptyText = 'Không tìm thấy kết quả nào'
+}: UnitSearchSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -59,7 +69,7 @@ export default function UnitSearchSelect({ units, value, onChange }: UnitSearchS
           className="w-full p-4 bg-white border-2 border-slate-300 rounded-xl text-left font-semibold flex items-center justify-between gap-2 hover:border-red-400 transition-colors"
         >
           <span className={value ? 'text-slate-800' : 'text-slate-400'}>
-            {value || '-- Chọn đơn vị báo cáo --'}
+            {value || placeholder}
           </span>
           <div className="flex items-center gap-1">
             {value && (
@@ -83,7 +93,7 @@ export default function UnitSearchSelect({ units, value, onChange }: UnitSearchS
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-12 pr-4 p-4 bg-white border-2 border-red-500 rounded-xl outline-none font-semibold text-slate-800 shadow-[0_0_0_4px_rgba(220,38,38,0.1)]"
-            placeholder="Gõ tên xã/phường để tìm..."
+            placeholder={searchPlaceholder}
             autoComplete="off"
           />
         </div>
@@ -94,7 +104,7 @@ export default function UnitSearchSelect({ units, value, onChange }: UnitSearchS
         <div className="absolute z-50 mt-2 w-full bg-white border-2 border-slate-300 rounded-xl shadow-2xl max-h-64 overflow-y-auto">
           {filtered.length === 0 ? (
             <div className="p-4 text-center text-slate-400 font-semibold text-sm">
-              Không tìm thấy đơn vị nào
+              {emptyText}
             </div>
           ) : (
             filtered.map((unit, idx) => (
