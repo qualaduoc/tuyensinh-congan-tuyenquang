@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import AdminLogin from '@/features/admin/AdminLogin';
-import BangThongKe from '@/features/report/BangThongKe';
+import AdminContent from '@/components/layout/AdminContent';
 import { LogOut, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import SVGVietnamShield from '@/components/ui/SVGVietnamShield';
@@ -32,7 +32,7 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen bg-[#F0F2F5] font-sans text-slate-900 pb-12 flex flex-col">
       {/* Admin Header - Đỏ thẫm viền vàng y hệt Home */}
-      <header className="bg-gradient-to-r from-[#8B0000] via-[#CD0000] to-[#8B0000] text-white shadow-2xl sticky top-0 z-50 border-b-4 border-yellow-400 no-print">
+      <header className="bg-gradient-to-r from-[#8B0000] via-[#CD0000] to-[#8B0000] text-white shadow-2xl sticky top-0 z-50 border-b-4 border-yellow-400 print:hidden">
         <div className="max-w-7xl mx-auto px-4 py-3 md:py-4 relative">
           
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
@@ -65,11 +65,11 @@ export default function AdminPage() {
       </header>
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 py-8">
-        <BangThongKe />
+        <AdminContent />
       </main>
       
       {/* Footer Mobile/Desktop */}
-      <footer className="w-full text-center py-6 mt-8 border-t border-slate-300 text-slate-500 text-xs md:text-sm font-semibold relative overflow-hidden bg-white no-print">
+      <footer className="w-full text-center py-6 mt-8 border-t border-slate-300 text-slate-500 text-xs md:text-sm font-semibold relative overflow-hidden bg-white print:hidden">
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-yellow-400 via-red-600 to-yellow-400"></div>
         <p>Bản quyền © 2026 thuộc về Công An Tỉnh Tuyên Quang.</p>
         <p className="mt-1 opacity-70">Phát triển và bảo mật bởi <a href="https://zalo.me/0982612007" target="_blank" rel="noopener noreferrer" className="text-red-600 hover:text-red-800 underline font-bold">Siêu Việt Tuyên Quang</a></p>

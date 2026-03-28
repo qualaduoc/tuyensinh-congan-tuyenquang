@@ -1,0 +1,796 @@
+import React, { useState, useEffect, useMemo } from 'react';
+import { 
+  Plus, 
+  List, 
+  BarChart3, 
+  Printer, 
+  Search, 
+  Trash2, 
+  Save, 
+  FileText,
+  Calendar,
+  Filter,
+  ChevronLeft,
+  Download
+} from 'lucide-react';
+
+const App = () => {
+  const [view, setView] = useState('dashboard'); // dashboard, form, report, print
+  const [registrations, setRegistrations] = useState([]);
+  const [selectedReg, setSelectedReg] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterDate, setFilterDate] = useState({ day: '', month: '', year: '2026' });
+
+  // Constants based on CV 865 and Phụ lục 02, 05
+  const DANH_SACH_PHUONG_THUC = [
+    "Phương thức 1 (Tuyển thẳng)",
+    "Phương thức 2 (Chứng chỉ NNQT + BCA)",
+    "Phương thức 3 (Thi THPT + BCA)",
+    "Phương thức 2 và Phương thức 3"
+  ];
+
+  const DANH_SACH_DAI_HOC = [
+    "Không đăng ký",
+    "Học viện An ninh nhân dân (T01) - ANH",
+    "Học viện Cảnh sát nhân dân (T02) - CSH",
+    "Học viện Chính trị CAND (T03) - HCA",
+    "Trường ĐH An ninh nhân dân (T04) - ANS",
+    "Trường ĐH Cảnh sát nhân dân (T05) - CSS",
+    "Trường ĐH Phòng cháy chữa cháy (T06) - PCH",
+    "Học viện Kỹ thuật và Công nghệ an ninh (T07) - KTH",
+    "Học viện Quốc tế (B06) - AIS"
+  ];
+
+  const DANH_SACH_TRUNG_CAP = [
+    "Không đăng ký",
+    "Trường CĐ An ninh nhân dân I (T08) - ANN",
+    "Trường CĐ Cảnh sát nhân dân I (T09) - CS1",
+    "Trường CĐ Cảnh sát nhân dân II (T10) - CS2"
+  ];
+
+  const DANH_SACH_TO_HOP = [
+    "A00", "A01", "B00", "B08", "C00", "C03", "D01", "D04", "D07", "D09", "D10", "X26", "X27", "X28", "X02", "X03", "X04"
+  ];
+
+  const DANH_SACH_BAI_BCA = [
+    "Không đăng ký",
+    "CA1 (Vật lí)",
+    "CA2 (Hóa học)",
+    "CA3 (Sinh học)",
+    "CA4 (Địa lí)"
+  ];
+
+  // Initial Form State
+  const initialForm = {
+    id: Date.now(),
+    createDate: new Date().toISOString(),
+    fullName: '',
+    dob: '',
+    cccd: '',
+    gender: 'Nữ',
+    candidateType: 'HSPT',
+    method: 'Phương thức 2 và Phương thức 3',
+    uniChoice: 'Học viện An ninh nhân dân (T01) - ANH',
+    collegeChoice: 'Trường CĐ An ninh nhân dân I (T08) - ANN',
+    combinations: 'C03',
+    academic: {
+      l10: { academic: 'Tốt', conduct: 'Tốt', m1: 8.6, m2: 8.6, m3: 8.6 },
+      l11: { academic: 'Tốt', conduct: 'Tốt', m1: 8.7, m2: 8.7, m3: 8.7 },
+      l12: { academic: 'Tốt', conduct: 'Tốt', m1: 9.1, m2: 8.7, m3: 9.1 },
+    },
+    gradYear: '2026',
+    officerRating2025: 'Không',
+    priorityType: 'Không',
+    priorityArea: 'Không',
+    achievements: 'Không',
+    bcaExam: 'CA1 (Vật lí)',
+    physicalTest: {
+      batXa: true,
+      xaDon: false,
+      chay100m: true,
+      chay800m: true,
+      chay1500m: false
+    },
+    height: '',
+    weight: '',
+    familyRep: 'Đỗ Hoài Thu',
+    city: 'Hà Nội'
+  };
+
+  const [formData, setFormData] = useState(initialForm);
+
+  // Load sample data on first run
+  useEffect(() => {
+    const saved = localStorage.getItem('cand_registrations');
+    if (saved) {
+      setRegistrations(JSON.parse(saved));
+    } else {
+      // Mock data
+      const mock = [
+        { ...initialForm, id: 1, fullName: 'Nguyễn Nhật Anh', dob: '2008-01-24', cccd: '001308025681' },
+        { ...initialForm, id: 2, fullName: 'Trần Minh Quân', dob: '2008-05-12', gender: 'Nam', cccd: '001208012345', physicalTest: { ...initialForm.physicalTest, xaDon: true, chay1500m: true, chay800m: false } }
+      ];
+      setRegistrations(mock);
+      localStorage.setItem('cand_registrations', JSON.stringify(mock));
+    }
+  }, []);
+
+  const saveToLocal = (data) => {
+    localStorage.setItem('cand_registrations', JSON.stringify(data));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    let updated;
+    if (registrations.find(r => r.id === formData.id)) {
+      updated = registrations.map(r => r.id === formData.id ? formData : r);
+    } else {
+      updated = [...registrations, { ...formData, id: Date.now(), createDate: new Date().toISOString() }];
+    }
+    setRegistrations(updated);
+    saveToLocal(updated);
+    setView('dashboard');
+    setFormData(initialForm);
+  };
+
+  const deleteReg = (id) => {
+    const updated = registrations.filter(r => r.id !== id);
+    setRegistrations(updated);
+    saveToLocal(updated);
+  };
+
+  const handlePrint = (reg) => {
+    setSelectedReg(reg);
+    setView('print');
+    setTimeout(() => window.print(), 500);
+  };
+
+  // Filtering Logic
+  const filteredData = useMemo(() => {
+    return registrations.filter(r => {
+      const date = new Date(r.createDate);
+      const matchesSearch = r.fullName.toLowerCase().includes(searchTerm.toLowerCase()) || r.cccd.includes(searchTerm);
+      const matchesDay = filterDate.day ? date.getDate() === parseInt(filterDate.day) : true;
+      const matchesMonth = filterDate.month ? (date.getMonth() + 1) === parseInt(filterDate.month) : true;
+      const matchesYear = filterDate.year ? date.getFullYear() === parseInt(filterDate.year) : true;
+      return matchesSearch && matchesDay && matchesMonth && matchesYear;
+    });
+  }, [registrations, searchTerm, filterDate]);
+
+  // Aggregation Logic
+  const stats = useMemo(() => {
+    const totals = {
+      total: filteredData.length,
+      male: filteredData.filter(r => r.gender === 'Nam').length,
+      female: filteredData.filter(r => r.gender === 'Nữ').length,
+      byCombination: {},
+      byCandidateType: {}
+    };
+
+    filteredData.forEach(r => {
+      totals.byCandidateType[r.candidateType] = (totals.byCandidateType[r.candidateType] || 0) + 1;
+      // Simplified combo grouping
+      const mainCombo = r.combinations.split(';')[0].split(' ')[0];
+      totals.byCombination[mainCombo] = (totals.byCombination[mainCombo] || 0) + 1;
+    });
+
+    return totals;
+  }, [filteredData]);
+
+  return (
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans print:bg-white">
+      {/* Navigation - Hidden on Print */}
+      <nav className="bg-blue-900 text-white p-3 sm:p-4 shadow-lg print:hidden sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
+          <div className="flex items-center space-x-2 sm:space-x-3">
+            <div className="bg-red-600 p-1.5 sm:p-2 rounded-full shadow-inner">
+              <FileText size={20} className="sm:w-6 sm:h-6" />
+            </div>
+            <div>
+              <h1 className="font-bold text-base sm:text-lg leading-tight">CAND ENROLLMENT</h1>
+              <p className="text-[10px] sm:text-xs text-blue-200">Hệ thống sơ tuyển năm 2026</p>
+            </div>
+          </div>
+          <div className="flex space-x-1 sm:space-x-2">
+            <button 
+              onClick={() => { setView('dashboard'); setSelectedReg(null); }}
+              className={`p-2 sm:px-4 sm:py-2 rounded-lg flex items-center space-x-2 transition ${view === 'dashboard' ? 'bg-blue-700' : 'hover:bg-blue-800'}`}
+              title="Danh sách"
+            >
+              <List size={18} /> <span className="hidden md:inline">Danh sách</span>
+            </button>
+            <button 
+              onClick={() => { setFormData(initialForm); setView('form'); }}
+              className={`p-2 sm:px-4 sm:py-2 rounded-lg flex items-center space-x-2 transition ${view === 'form' ? 'bg-blue-700' : 'hover:bg-blue-800'}`}
+              title="Đăng ký mới"
+            >
+              <Plus size={18} /> <span className="hidden md:inline">Đăng ký mới</span>
+            </button>
+            <button 
+              onClick={() => setView('report')}
+              className={`p-2 sm:px-4 sm:py-2 rounded-lg flex items-center space-x-2 transition ${view === 'report' ? 'bg-blue-700' : 'hover:bg-blue-800'}`}
+              title="Báo cáo"
+            >
+              <BarChart3 size={18} /> <span className="hidden md:inline">Báo cáo</span>
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      <main className="max-w-7xl mx-auto p-4 sm:p-6 print:p-0">
+        
+        {/* Dashboard View */}
+        {view === 'dashboard' && (
+          <div className="space-y-4 sm:space-y-6 animate-in fade-in duration-500">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-800">Danh sách sơ tuyển</h2>
+              <div className="relative group w-full sm:w-auto">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={20} />
+                <input 
+                  type="text" 
+                  placeholder="Tìm tên hoặc CCCD..." 
+                  className="pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl w-full sm:w-80 focus:ring-2 focus:ring-blue-500 focus:outline-none shadow-sm transition-all"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+              <div className="overflow-x-auto w-full">
+                <table className="w-full text-left whitespace-nowrap">
+                  <thead className="bg-slate-50 border-b border-slate-200">
+                    <tr>
+                      <th className="px-4 sm:px-6 py-3 sm:py-4 font-semibold text-slate-600 text-sm sm:text-base">Họ và tên</th>
+                      <th className="px-4 sm:px-6 py-3 sm:py-4 font-semibold text-slate-600 text-sm sm:text-base">Ngày sinh</th>
+                      <th className="px-4 sm:px-6 py-3 sm:py-4 font-semibold text-slate-600 text-sm sm:text-base">Giới tính</th>
+                      <th className="px-4 sm:px-6 py-3 sm:py-4 font-semibold text-slate-600 text-sm sm:text-base">Đối tượng</th>
+                      <th className="px-4 sm:px-6 py-3 sm:py-4 font-semibold text-slate-600 text-sm sm:text-base hidden sm:table-cell">Trường ĐK</th>
+                      <th className="px-4 sm:px-6 py-3 sm:py-4 font-semibold text-slate-600 text-right text-sm sm:text-base">Thao tác</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {filteredData.length > 0 ? filteredData.map((reg) => (
+                      <tr key={reg.id} className="hover:bg-blue-50/50 transition-colors group">
+                        <td className="px-4 sm:px-6 py-3 sm:py-4 font-medium text-slate-900 text-sm sm:text-base">{reg.fullName}</td>
+                        <td className="px-4 sm:px-6 py-3 sm:py-4 text-slate-600 text-sm sm:text-base">{new Date(reg.dob).toLocaleDateString('vi-VN')}</td>
+                        <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm sm:text-base">
+                          <span className={`px-2 py-1 rounded-full text-xs font-semibold ${reg.gender === 'Nam' ? 'bg-blue-100 text-blue-700' : 'bg-pink-100 text-pink-700'}`}>
+                            {reg.gender}
+                          </span>
+                        </td>
+                        <td className="px-4 sm:px-6 py-3 sm:py-4 text-slate-600 text-sm sm:text-base">{reg.candidateType}</td>
+                        <td className="px-4 sm:px-6 py-3 sm:py-4 text-slate-600 truncate max-w-[150px] sm:max-w-[200px] hidden sm:table-cell" title={reg.uniChoice}>
+                          {reg.uniChoice}
+                        </td>
+                        <td className="px-4 sm:px-6 py-3 sm:py-4 text-right space-x-1 sm:space-x-2">
+                          <button 
+                            onClick={() => handlePrint(reg)}
+                            className="p-1.5 sm:p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-100 rounded-lg transition-all"
+                            title="In phiếu"
+                          >
+                            <Printer size={16} className="sm:w-[18px] sm:h-[18px]" />
+                          </button>
+                          <button 
+                            onClick={() => { setFormData(reg); setView('form'); }}
+                            className="p-1.5 sm:p-2 text-slate-400 hover:text-green-600 hover:bg-green-100 rounded-lg transition-all"
+                            title="Chỉnh sửa"
+                          >
+                            <FileText size={16} className="sm:w-[18px] sm:h-[18px]" />
+                          </button>
+                          <button 
+                            onClick={() => deleteReg(reg.id)}
+                            className="p-1.5 sm:p-2 text-slate-400 hover:text-red-600 hover:bg-red-100 rounded-lg transition-all"
+                            title="Xóa"
+                          >
+                            <Trash2 size={16} className="sm:w-[18px] sm:h-[18px]" />
+                          </button>
+                        </td>
+                      </tr>
+                    )) : (
+                      <tr>
+                        <td colSpan="6" className="px-6 py-12 text-center text-slate-400 italic">
+                          Không tìm thấy dữ liệu đăng ký nào.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Form View */}
+        {view === 'form' && (
+          <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6 animate-in slide-in-from-bottom duration-500">
+            <div className="flex items-center space-x-2 sm:space-x-4">
+              <button onClick={() => setView('dashboard')} className="p-1.5 sm:p-2 hover:bg-slate-200 rounded-full transition-colors">
+                <ChevronLeft size={20} className="sm:w-6 sm:h-6" />
+              </button>
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-800">
+                {formData.id === initialForm.id ? "Đăng ký sơ tuyển mới" : "Cập nhật thông tin"}
+              </h2>
+            </div>
+
+            <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-md border border-slate-200 p-4 sm:p-8 space-y-6 sm:space-y-8">
+              {/* Section 1: Basic Info */}
+              <div className="space-y-3 sm:space-y-4">
+                <h3 className="text-base sm:text-lg font-semibold text-blue-900 border-b pb-2 flex items-center gap-2">
+                  <span className="bg-blue-100 text-blue-700 w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center rounded-full text-[10px] sm:text-xs">01</span>
+                  Thông tin cá nhân
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-sm font-medium text-slate-700">1. Họ và tên</label>
+                    <input 
+                      type="text" required
+                      className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                      value={formData.fullName}
+                      onChange={(e) => setFormData({...formData, fullName: e.target.value})}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm font-medium text-slate-700">2. Ngày sinh</label>
+                    <input 
+                      type="date" required
+                      className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                      value={formData.dob}
+                      onChange={(e) => setFormData({...formData, dob: e.target.value})}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm font-medium text-slate-700">3. Số CCCD</label>
+                    <input 
+                      type="text" required
+                      className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                      value={formData.cccd}
+                      onChange={(e) => setFormData({...formData, cccd: e.target.value})}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm font-medium text-slate-700">4. Giới tính</label>
+                    <select 
+                      className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                      value={formData.gender}
+                      onChange={(e) => setFormData({...formData, gender: e.target.value})}
+                    >
+                      <option>Nam</option>
+                      <option>Nữ</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 2: Registration details */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-blue-900 border-b pb-2 flex items-center gap-2">
+                  <span className="bg-blue-100 text-blue-700 w-6 h-6 flex items-center justify-center rounded-full text-xs">02</span>
+                  Nguyện vọng xét tuyển
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                   <div className="space-y-1">
+                    <label className="text-sm font-medium text-slate-700">5. Đối tượng</label>
+                    <select 
+                      className="w-full p-2 border border-slate-300 rounded-lg outline-none"
+                      value={formData.candidateType}
+                      onChange={(e) => setFormData({...formData, candidateType: e.target.value})}
+                    >
+                      <option>HSPT</option>
+                      <option>CSNV tại ngũ</option>
+                      <option>CSNV xuất ngũ</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm font-medium text-slate-700">6. Phương thức dự tuyển</label>
+                    <select 
+                      className="w-full p-2 border border-slate-300 rounded-lg outline-none"
+                      value={formData.method}
+                      onChange={(e) => setFormData({...formData, method: e.target.value})}
+                    >
+                      {DANH_SACH_PHUONG_THUC.map(pt => <option key={pt} value={pt}>{pt}</option>)}
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm font-medium text-slate-700">7. Đăng ký xét tuyển Đại học</label>
+                    <select 
+                      className="w-full p-2 border border-slate-300 rounded-lg outline-none"
+                      value={formData.uniChoice}
+                      onChange={(e) => setFormData({...formData, uniChoice: e.target.value})}
+                    >
+                      {DANH_SACH_DAI_HOC.map(truong => <option key={truong} value={truong}>{truong}</option>)}
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm font-medium text-slate-700">8. Đăng ký xét tuyển Trung cấp</label>
+                    <select 
+                      className="w-full p-2 border border-slate-300 rounded-lg outline-none"
+                      value={formData.collegeChoice}
+                      onChange={(e) => setFormData({...formData, collegeChoice: e.target.value})}
+                    >
+                      {DANH_SACH_TRUNG_CAP.map(truong => <option key={truong} value={truong}>{truong}</option>)}
+                    </select>
+                  </div>
+                  <div className="space-y-1 md:col-span-2">
+                    <label className="text-sm font-medium text-slate-700">9. Tổ hợp đăng ký xét tuyển</label>
+                    <select 
+                      className="w-full p-2 border border-slate-300 rounded-lg outline-none"
+                      value={formData.combinations}
+                      onChange={(e) => setFormData({...formData, combinations: e.target.value})}
+                    >
+                      {DANH_SACH_TO_HOP.map(tohop => <option key={tohop} value={tohop}>{tohop}</option>)}
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 3: Scores */}
+              <div className="space-y-3 sm:space-y-4">
+                <h3 className="text-base sm:text-lg font-semibold text-blue-900 border-b pb-2 flex items-center gap-2">
+                  <span className="bg-blue-100 text-blue-700 w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center rounded-full text-[10px] sm:text-xs">03</span>
+                  Kết quả học tập
+                </h3>
+                <div className="overflow-x-auto pb-2">
+                  <div className="min-w-[600px]">
+                    <table className="w-full text-sm border-collapse">
+                      <thead>
+                        <tr className="bg-slate-50">
+                          <th className="p-2 border border-slate-200 whitespace-nowrap">Năm học</th>
+                          <th className="p-2 border border-slate-200 whitespace-nowrap">Học lực</th>
+                          <th className="p-2 border border-slate-200 whitespace-nowrap">Hạnh kiểm</th>
+                          <th className="p-2 border border-slate-200 whitespace-nowrap">Môn 1</th>
+                          <th className="p-2 border border-slate-200 whitespace-nowrap">Môn 2</th>
+                          <th className="p-2 border border-slate-200 whitespace-nowrap">Môn 3</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {['l10', 'l11', 'l12'].map((grade) => (
+                          <tr key={grade}>
+                            <td className="p-2 border border-slate-200 font-medium text-center whitespace-nowrap bg-slate-50/50">{grade === 'l12' ? 'Lớp 12 (Kì 1)' : `Lớp ${grade.slice(1)}`}</td>
+                            <td className="p-1 sm:p-2 border border-slate-200">
+                              <input type="text" className="w-full text-center outline-none bg-transparent" value={formData.academic[grade].academic} onChange={(e) => setFormData({...formData, academic: {...formData.academic, [grade]: {...formData.academic[grade], academic: e.target.value}}})} />
+                            </td>
+                            <td className="p-1 sm:p-2 border border-slate-200">
+                              <input type="text" className="w-full text-center outline-none bg-transparent" value={formData.academic[grade].conduct} onChange={(e) => setFormData({...formData, academic: {...formData.academic, [grade]: {...formData.academic[grade], conduct: e.target.value}}})} />
+                            </td>
+                            <td className="p-1 sm:p-2 border border-slate-200">
+                              <input type="number" step="0.1" className="w-full text-center outline-none bg-transparent" value={formData.academic[grade].m1} onChange={(e) => setFormData({...formData, academic: {...formData.academic, [grade]: {...formData.academic[grade], m1: e.target.value}}})} />
+                            </td>
+                            <td className="p-1 sm:p-2 border border-slate-200">
+                              <input type="number" step="0.1" className="w-full text-center outline-none bg-transparent" value={formData.academic[grade].m2} onChange={(e) => setFormData({...formData, academic: {...formData.academic, [grade]: {...formData.academic[grade], m2: e.target.value}}})} />
+                            </td>
+                            <td className="p-1 sm:p-2 border border-slate-200">
+                              <input type="number" step="0.1" className="w-full text-center outline-none bg-transparent" value={formData.academic[grade].m3} onChange={(e) => setFormData({...formData, academic: {...formData.academic, [grade]: {...formData.academic[grade], m3: e.target.value}}})} />
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* Additional details 11-16 */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 pt-4">
+                  <div className="space-y-1">
+                    <label className="text-sm font-medium text-slate-700">11. Năm tốt nghiệp</label>
+                    <input type="number" className="w-full p-2 border border-slate-300 rounded-lg outline-none" value={formData.gradYear} onChange={(e) => setFormData({...formData, gradYear: e.target.value})} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm font-medium text-slate-700">12. Phân loại CB 2025</label>
+                    <input type="text" className="w-full p-2 border border-slate-300 rounded-lg outline-none" value={formData.officerRating2025} onChange={(e) => setFormData({...formData, officerRating2025: e.target.value})} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm font-medium text-slate-700">13. Đối tượng ưu tiên</label>
+                    <input type="text" className="w-full p-2 border border-slate-300 rounded-lg outline-none" value={formData.priorityType} onChange={(e) => setFormData({...formData, priorityType: e.target.value})} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm font-medium text-slate-700">14. Khu vực ưu tiên</label>
+                    <input type="text" className="w-full p-2 border border-slate-300 rounded-lg outline-none" value={formData.priorityArea} onChange={(e) => setFormData({...formData, priorityArea: e.target.value})} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm font-medium text-slate-700">15. Giải đạt được</label>
+                    <input type="text" className="w-full p-2 border border-slate-300 rounded-lg outline-none" value={formData.achievements} onChange={(e) => setFormData({...formData, achievements: e.target.value})} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm font-medium text-slate-700">16. Đăng ký bài thi BCA</label>
+                    <select 
+                      className="w-full p-2 border border-slate-300 rounded-lg outline-none bg-blue-50 font-medium"
+                      value={formData.bcaExam}
+                      onChange={(e) => setFormData({...formData, bcaExam: e.target.value})}
+                    >
+                      {DANH_SACH_BAI_BCA.map(bai => <option key={bai} value={bai}>{bai}</option>)}
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Physical Test */}
+              <div className="space-y-3 sm:space-y-4">
+                <h3 className="text-base sm:text-lg font-semibold text-blue-900 border-b pb-2 flex items-center gap-2">
+                  <span className="bg-blue-100 text-blue-700 w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center rounded-full text-[10px] sm:text-xs">04</span>
+                  Kiểm tra thể lực & Sức khỏe
+                </h3>
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
+                   <label className="flex items-center space-x-2 p-2 sm:p-3 bg-slate-50 rounded-xl border border-slate-100 cursor-pointer hover:bg-blue-50 hover:border-blue-200 transition-colors">
+                    <input type="checkbox" className="w-4 h-4 text-blue-600 rounded" checked={formData.physicalTest.batXa} onChange={(e) => setFormData({...formData, physicalTest: {...formData.physicalTest, batXa: e.target.checked}})} />
+                    <span className="text-xs sm:text-sm font-medium">Bật xa tại chỗ</span>
+                  </label>
+                  <label className="flex items-center space-x-2 p-2 sm:p-3 bg-slate-50 rounded-xl border border-slate-100 cursor-pointer hover:bg-blue-50 hover:border-blue-200 transition-colors">
+                    <input type="checkbox" className="w-4 h-4 text-blue-600 rounded" checked={formData.physicalTest.xaDon} onChange={(e) => setFormData({...formData, physicalTest: {...formData.physicalTest, xaDon: e.target.checked}})} />
+                    <span className="text-xs sm:text-sm font-medium">Co tay xà đơn</span>
+                  </label>
+                  <label className="flex items-center space-x-2 p-2 sm:p-3 bg-slate-50 rounded-xl border border-slate-100 cursor-pointer hover:bg-blue-50 hover:border-blue-200 transition-colors">
+                    <input type="checkbox" className="w-4 h-4 text-blue-600 rounded" checked={formData.physicalTest.chay100m} onChange={(e) => setFormData({...formData, physicalTest: {...formData.physicalTest, chay100m: e.target.checked}})} />
+                    <span className="text-xs sm:text-sm font-medium">Chạy 100m</span>
+                  </label>
+                  <label className="flex items-center space-x-2 p-2 sm:p-3 bg-slate-50 rounded-xl border border-slate-100 cursor-pointer hover:bg-blue-50 hover:border-blue-200 transition-colors">
+                    <input type="checkbox" className="w-4 h-4 text-blue-600 rounded" checked={formData.physicalTest.chay800m} onChange={(e) => setFormData({...formData, physicalTest: {...formData.physicalTest, chay800m: e.target.checked}})} />
+                    <span className="text-xs sm:text-sm font-medium">Chạy 800m</span>
+                  </label>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pt-2">
+                  <div className="space-y-1">
+                    <label className="text-sm font-medium text-slate-700">Chiều cao (cm)</label>
+                    <input type="number" className="w-full p-2 border border-slate-300 rounded-lg outline-none" value={formData.height} onChange={(e) => setFormData({...formData, height: e.target.value})} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm font-medium text-slate-700">Cân nặng (kg)</label>
+                    <input type="number" className="w-full p-2 border border-slate-300 rounded-lg outline-none" value={formData.weight} onChange={(e) => setFormData({...formData, weight: e.target.value})} />
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-6 sm:pt-4 flex flex-col sm:flex-row justify-end gap-3 sm:space-x-4">
+                <button 
+                  type="button" onClick={() => setView('dashboard')}
+                  className="w-full sm:w-auto px-6 py-2 border border-slate-300 text-slate-600 rounded-xl hover:bg-slate-50 transition-colors order-2 sm:order-1"
+                >
+                  Hủy bỏ
+                </button>
+                <button 
+                  type="submit"
+                  className="w-full sm:w-auto px-8 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 shadow-md shadow-blue-200 transition-all flex items-center justify-center space-x-2 order-1 sm:order-2"
+                >
+                  <Save size={18} /> <span>Lưu đăng ký</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* Report View */}
+        {view === 'report' && (
+          <div className="space-y-8 animate-in fade-in duration-500">
+            <h2 className="text-2xl font-bold text-slate-800">Báo cáo & Phân tích</h2>
+            
+            {/* Filters */}
+            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+              <div>
+                <label className="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">Lọc theo ngày</label>
+                <input type="number" placeholder="Ngày" className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" value={filterDate.day} onChange={e => setFilterDate({...filterDate, day: e.target.value})} />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">Lọc theo tháng</label>
+                <input type="number" placeholder="Tháng" className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" value={filterDate.month} onChange={e => setFilterDate({...filterDate, month: e.target.value})} />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">Năm tuyển sinh</label>
+                <input type="number" placeholder="Năm" className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" value={filterDate.year} onChange={e => setFilterDate({...filterDate, year: e.target.value})} />
+              </div>
+              <button 
+                onClick={() => setFilterDate({ day: '', month: '', year: '2026' })}
+                className="w-full md:w-auto p-2 text-blue-600 font-medium hover:bg-blue-50 rounded-lg text-sm transition-colors"
+              >
+                Đặt lại bộ lọc
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+              <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm border-l-4 border-l-blue-500">
+                <p className="text-sm font-medium text-slate-500">Tổng số hồ sơ</p>
+                <p className="text-3xl font-bold text-slate-900 mt-1">{stats.total}</p>
+              </div>
+              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm border-l-4 border-l-pink-500">
+                <p className="text-sm font-medium text-slate-500">Nữ giới</p>
+                <p className="text-3xl font-bold text-slate-900 mt-1">{stats.female}</p>
+              </div>
+              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm border-l-4 border-l-indigo-500">
+                <p className="text-sm font-medium text-slate-500">Nam giới</p>
+                <p className="text-3xl font-bold text-slate-900 mt-1">{stats.male}</p>
+              </div>
+              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm border-l-4 border-l-emerald-500">
+                <p className="text-sm font-medium text-slate-500">HSPT</p>
+                <p className="text-3xl font-bold text-slate-900 mt-1">{stats.byCandidateType['HSPT'] || 0}</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                <h3 className="font-bold text-slate-800 mb-6">Phân loại theo tổ hợp môn (Khối)</h3>
+                <div className="space-y-4">
+                  {Object.entries(stats.byCombination).map(([combo, count]) => (
+                    <div key={combo} className="space-y-1">
+                      <div className="flex justify-between text-sm font-medium">
+                        <span>{combo}</span>
+                        <span>{count} ({((count/stats.total)*100).toFixed(1)}%)</span>
+                      </div>
+                      <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                        <div className="bg-blue-600 h-full rounded-full" style={{ width: `${(count/stats.total)*100}%` }}></div>
+                      </div>
+                    </div>
+                  ))}
+                  {Object.keys(stats.byCombination).length === 0 && <p className="text-slate-400 italic">Chưa có dữ liệu</p>}
+                </div>
+              </div>
+
+              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                <h3 className="font-bold text-slate-800 mb-6">Tình trạng hồ sơ chi tiết</h3>
+                <div className="divide-y divide-slate-100">
+                  <div className="py-3 flex justify-between">
+                    <span className="text-slate-600">HSPT (Học sinh phổ thông)</span>
+                    <span className="font-bold">{stats.byCandidateType['HSPT'] || 0}</span>
+                  </div>
+                  <div className="py-3 flex justify-between">
+                    <span className="text-slate-600">CSNV tại ngũ</span>
+                    <span className="font-bold">{stats.byCandidateType['CSNV tại ngũ'] || 0}</span>
+                  </div>
+                  <div className="py-3 flex justify-between">
+                    <span className="text-slate-600">CSNV xuất ngũ</span>
+                    <span className="font-bold">{stats.byCandidateType['CSNV xuất ngũ'] || 0}</span>
+                  </div>
+                </div>
+                <button className="w-full mt-6 py-2 bg-slate-900 text-white rounded-xl hover:bg-slate-800 transition-colors flex items-center justify-center space-x-2">
+                  <Download size={18} /> <span>Xuất Excel Báo Cáo</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Print View - Exact Match to Uploaded Doc */}
+        {view === 'print' && selectedReg && (
+          <div className="overflow-x-auto bg-slate-200 print:bg-white p-2 sm:p-8 rounded-xl print:p-0">
+            <div className="bg-white p-6 sm:p-10 text-black font-serif leading-relaxed w-[21cm] min-w-[21cm] mx-auto print:p-0 print:m-0 print:shadow-none shadow-xl border border-slate-100 box-border">
+              {/* Header */}
+              <div className="flex justify-between items-start mb-6">
+                CÔNG AN THÀNH PHỐ HÀ NỘI<br/>
+                <span className="border-b border-black inline-block pb-0.5">CÔNG AN PHƯỜNG BỒ ĐỀ</span>
+              </div>
+              <div className="text-center">
+                <div className="font-bold uppercase text-sm">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</div>
+                <div className="font-bold text-sm border-b border-black inline-block pb-0.5">Độc lập - Tự do - Hạnh phúc</div>
+              </div>
+            </div>
+
+            {/* Title */}
+            <div className="text-center mb-8">
+              <h2 className="font-bold text-lg uppercase mb-1">PHIẾU ĐĂNG KÝ SƠ TUYỂN</h2>
+              <h3 className="font-bold text-md uppercase">VÀO CÁC TRƯỜNG ĐẠI HỌC, TRUNG CẤP CAND NĂM 2026</h3>
+            </div>
+
+            {/* Content Body */}
+            <div className="space-y-3 text-[14px]">
+              <div className="flex gap-10">
+                <p><span className="font-bold">1. Họ và tên:</span> {selectedReg.fullName}</p>
+                <p><span className="font-bold">2. Ngày sinh:</span> {new Date(selectedReg.dob).toLocaleDateString('vi-VN')}</p>
+              </div>
+              
+              <div className="flex gap-10">
+                <p><span className="font-bold">3. Số CCCD:</span> {selectedReg.cccd}</p>
+                <p><span className="font-bold">4. Giới tính:</span> {selectedReg.gender}</p>
+              </div>
+
+              <p><span className="font-bold">5. Đối tượng (HSPT, CSNV tại ngũ, CSNV xuất ngũ):</span> {selectedReg.candidateType}</p>
+              <p><span className="font-bold">6. Phương thức dự tuyển:</span> {selectedReg.method}</p>
+              <p><span className="font-bold">7. Đăng ký xét tuyển đại học:</span> {selectedReg.uniChoice}</p>
+              <p><span className="font-bold">8. Đăng ký xét tuyển trung cấp:</span> {selectedReg.collegeChoice}</p>
+              <p><span className="font-bold">9. Tổ hợp đăng ký xét tuyển:</span> {selectedReg.combinations}</p>
+
+              <div>
+                <p className="font-bold mb-2">10. Học lực/Hạnh kiểm:</p>
+                <table className="w-full border-collapse border border-black text-center text-xs">
+                  <thead>
+                    <tr className="bg-slate-50">
+                      <th className="border border-black p-1">Học lực /Hạnh kiểm cả năm (Khá/Tốt)</th>
+                      <th className="border border-black p-1">Lớp 10</th>
+                      <th className="border border-black p-1">Lớp 11</th>
+                      <th className="border border-black p-1">Lớp 12 (Kì 1)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td className="border border-black p-2">Kết quả chung</td>
+                      <td className="border border-black p-2">{selectedReg.academic.l10.academic}/ {selectedReg.academic.l10.conduct}</td>
+                      <td className="border border-black p-2">{selectedReg.academic.l11.academic}/ {selectedReg.academic.l11.conduct}</td>
+                      <td className="border border-black p-2">{selectedReg.academic.l12.academic}/ {selectedReg.academic.l12.conduct}</td>
+                    </tr>
+                    <tr>
+                      <td className="border border-black p-1">Điểm tổng kết từng môn (M1/M2/M3)</td>
+                      <td className="border border-black p-1">{selectedReg.academic.l10.m1} / {selectedReg.academic.l10.m2} / {selectedReg.academic.l10.m3}</td>
+                      <td className="border border-black p-1">{selectedReg.academic.l11.m1} / {selectedReg.academic.l11.m2} / {selectedReg.academic.l11.m3}</td>
+                      <td className="border border-black p-1">{selectedReg.academic.l12.m1} / {selectedReg.academic.l12.m2} / {selectedReg.academic.l12.m3}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <p><span className="font-bold">11. Năm tốt nghiệp THPT:</span> {selectedReg.gradYear}</p>
+                <p><span className="font-bold">12. Phân loại CB 2025:</span> {selectedReg.officerRating2025}</p>
+                <p><span className="font-bold">13. Đối tượng ưu tiên:</span> {selectedReg.priorityType}</p>
+                <p><span className="font-bold">14. Khu vực ưu tiên:</span> {selectedReg.priorityArea}</p>
+                <p><span className="font-bold">15. Giải đạt được:</span> {selectedReg.achievements}</p>
+                <p><span className="font-bold">16. Đăng ký bài thi BCA:</span> {selectedReg.bcaExam}</p>
+              </div>
+
+              <div className="pt-2">
+                <p className="font-bold mb-1">17. Đăng ký kiểm tra thể lực:</p>
+                <div className="grid grid-cols-5 border border-black text-[11px] text-center italic">
+                  <div className="border-r border-black p-1">Bật xa tại chỗ<br/>(nam, nữ)</div>
+                  <div className="border-r border-black p-1">Co tay xà đơn<br/>(nam)</div>
+                  <div className="border-r border-black p-1">Chạy 100m<br/>(nam, nữ)</div>
+                  <div className="border-r border-black p-1">Chạy 800m<br/>(nữ)</div>
+                  <div className="p-1">Chạy 1500m<br/>(nam)</div>
+                </div>
+                <div className="grid grid-cols-5 border-x border-b border-black text-center h-8 items-center font-bold">
+                  <div className="border-r border-black">{selectedReg.physicalTest.batXa ? 'X' : ''}</div>
+                  <div className="border-r border-black">{selectedReg.physicalTest.xaDon ? 'X' : ''}</div>
+                  <div className="border-r border-black">{selectedReg.physicalTest.chay100m ? 'X' : ''}</div>
+                  <div className="border-r border-black">{selectedReg.physicalTest.chay800m ? 'X' : ''}</div>
+                  <div>{selectedReg.physicalTest.chay1500m ? 'X' : ''}</div>
+                </div>
+              </div>
+
+              <p><span className="font-bold">19. Kết quả kiểm tra sức khỏe:</span> Chiều cao: {selectedReg.height || '.....'} cm; Cân nặng: {selectedReg.weight || '.....'} kg.</p>
+
+              {/* Signatures */}
+              <div className="pt-8 grid grid-cols-2 text-center text-[14px]">
+                <div className="space-y-20">
+                  <div className="font-bold uppercase italic">ĐẠI DIỆN GIA ĐÌNH THÍ SINH</div>
+                  <div className="font-bold">{selectedReg.familyRep}</div>
+                </div>
+                <div className="space-y-20">
+                  <div>
+                    <div className="italic">{selectedReg.city}, ngày {new Date().getDate()} tháng {new Date().getMonth() + 1} năm {new Date().getFullYear()}</div>
+                    <div className="font-bold uppercase">THÍ SINH ĐĂNG KÝ</div>
+                  </div>
+                  <div className="font-bold">{selectedReg.fullName}</div>
+                </div>
+              </div>
+
+              <div className="mt-12">
+                <div className="font-bold uppercase text-center w-40 ml-0 border-t border-black pt-1">CÁN BỘ SƠ TUYỂN</div>
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
+
+      {/* Floating Action Button (only on print view to exit) */}
+      {view === 'print' && (
+        <button 
+          onClick={() => setView('dashboard')}
+          className="fixed bottom-6 right-6 bg-slate-900 text-white p-4 rounded-full shadow-2xl print:hidden hover:scale-110 transition-transform"
+        >
+          <ChevronLeft size={24} />
+        </button>
+      )}
+
+      <footer className="max-w-7xl mx-auto p-8 text-center text-slate-400 text-sm print:hidden">
+        Hệ thống quản lý nội bộ - Dữ liệu được bảo mật theo quy định Công An Nhân Dân.
+      </footer>
+
+      {/* Print Styles */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        @media print {
+          @page { size: A4; margin: 1.5cm; }
+          body { background: white !important; }
+          nav, footer, button, .no-print { display: none !important; }
+          .print-area { display: block !important; padding: 0; }
+        }
+      `}} />
+    </div>
+  );
+};
+
+export default App;

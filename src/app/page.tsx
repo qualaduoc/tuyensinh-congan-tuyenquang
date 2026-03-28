@@ -1,6 +1,6 @@
 import React from 'react';
 import { Lock, FileText, Download } from 'lucide-react';
-import FormNhapLieu from '@/features/form/FormNhapLieu';
+import HomeContent from '@/components/layout/HomeContent';
 import Link from 'next/link';
 import SVGVietnamShield from '@/components/ui/SVGVietnamShield';
 
@@ -36,7 +36,7 @@ export default function Home() {
       
       {/* Nền xanh viền nhạt mô phỏng VNeID body */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 py-6 md:py-10">
-        <FormNhapLieu />
+        <HomeContent />
       </main>
 
       {/* Footer Mobile/Desktop */}
