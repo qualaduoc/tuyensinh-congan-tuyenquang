@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { ShieldCheck, User, Key, KeyRound, Loader2 } from 'lucide-react';
+import { User, Key, KeyRound, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { loginAdmin } from './actions';
 
@@ -43,11 +43,11 @@ export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
         <div className="bg-gradient-to-b from-[#8B0000] to-[#5B0000] px-6 py-10 text-center relative overflow-hidden">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[180px] h-[180px] bg-yellow-500/20 blur-[50px] rounded-full"></div>
           
-          <ShieldCheck className="relative w-16 h-16 text-yellow-400 mx-auto mb-4 drop-shadow-[0_0_10px_rgba(250,204,21,0.8)]" />
+          <img src="https://gianhang.skypecmb.com/Logo%20B%E1%BB%99%20C%C3%B4ng%20An.png" alt="Logo Bộ Công An" className="relative w-16 h-16 mx-auto mb-4 object-contain drop-shadow-[0_0_10px_rgba(250,204,21,0.8)]" />
           <h2 className="relative text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 to-yellow-500 uppercase tracking-wide">
             Đăng nhập quản trị
           </h2>
-          <p className="relative text-red-200 text-xs mt-3 font-semibold">Công an Tỉnh Tuyên Quang - Tuyển sinh 2026</p>
+          <p className="relative text-red-200 text-xs mt-3 font-semibold">Đội tổ chức biên chế đào tạo Phòng TCCB - Công an Tỉnh Tuyên Quang - Tuyển sinh 2026</p>
         </div>
         
         <form onSubmit={handleLogin} className="p-8 space-y-6">

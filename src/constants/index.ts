@@ -1,4 +1,7 @@
 export const UNITS = [
+  // === TRƯỜNG HỌC ===
+  "Trường nội trú Tỉnh Tuyên Quang",
+
   // === PHƯỜNG ===
   "Công an phường An Tường",
   "Công an phường Bình Thuận",

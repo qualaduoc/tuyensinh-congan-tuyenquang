@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Quản Lý SLL Tuyển Sinh - Công An Tuyên Quang',
+  title: 'Quản Lý SLL Tuyển Sinh - Đội tổ chức biên chế đào tạo Phòng TCCB - Công an Tỉnh Tuyên Quang',
   description: 'Hệ thống nhập liệu và báo cáo phòng TCCB - 2026',
 };
 

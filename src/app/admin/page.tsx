@@ -5,7 +5,6 @@ import AdminLogin from '@/features/admin/AdminLogin';
 import AdminContent from '@/components/layout/AdminContent';
 import { LogOut, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
-import SVGVietnamShield from '@/components/ui/SVGVietnamShield';
 
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
@@ -37,12 +36,12 @@ export default function AdminPage() {
           
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
             <div className="flex items-center flex-col md:flex-row gap-3">
-               <SVGVietnamShield className="w-16 h-16 md:w-20 md:h-20 drop-shadow-[0_0_15px_rgba(250,204,21,0.6)]" />
+               <img src="https://gianhang.skypecmb.com/Logo%20B%E1%BB%99%20C%C3%B4ng%20An.png" alt="Logo Bộ Công An" className="w-16 h-16 md:w-20 md:h-20 object-contain drop-shadow-[0_0_15px_rgba(250,204,21,0.6)]" />
               <div>
                 <h1 className="text-xl md:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 to-yellow-500 uppercase drop-shadow-md tracking-wide">
                   Trang quản trị số liệu tuyển sinh
                 </h1>
-                <p className="text-yellow-100/90 text-xs md:text-sm font-bold mt-1">Công an Tỉnh Tuyên Quang - 2026</p>
+                <p className="text-yellow-100/90 text-xs md:text-sm font-bold mt-1">Đội tổ chức biên chế đào tạo Phòng TCCB - Công an Tỉnh Tuyên Quang - 2026</p>
               </div>
             </div>
 
@@ -71,8 +70,7 @@ export default function AdminPage() {
       {/* Footer Mobile/Desktop */}
       <footer className="w-full text-center py-6 mt-8 border-t border-slate-300 text-slate-500 text-xs md:text-sm font-semibold relative overflow-hidden bg-white print:hidden">
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-yellow-400 via-red-600 to-yellow-400"></div>
-        <p>Bản quyền © 2026 thuộc về Công An Tỉnh Tuyên Quang.</p>
-        <p className="mt-1 opacity-70">Phát triển và bảo mật bởi <a href="https://zalo.me/0982612007" target="_blank" rel="noopener noreferrer" className="text-red-600 hover:text-red-800 underline font-bold">Siêu Việt Tuyên Quang</a></p>
+        <p>Bản quyền © 2026 thuộc về Đội tổ chức biên chế đào tạo Phòng TCCB - Công an Tỉnh Tuyên Quang.</p>
       </footer>
     </div>
   );
