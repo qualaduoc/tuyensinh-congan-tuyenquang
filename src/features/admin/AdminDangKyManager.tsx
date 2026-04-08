@@ -85,36 +85,58 @@ const AdminDangKyManager = () => {
 
   const [formData, setFormData] = useState<any>(null);
 
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchRegistrations = async () => {
+    setIsLoading(true);
+    try {
+      const { getOnlineRegistrations } = await import('./actions');
+      const response = await getOnlineRegistrations();
+      if (response && response.success) {
+        setRegistrations(response.data);
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const saved = localStorage.getItem('cand_public_registrations');
-    if (saved) {
-      setRegistrations(JSON.parse(saved));
-    }
-  }, [view]); // reload on view change to catch new submits from public form
+    fetchRegistrations();
+  }, [view]); // reload on view change to catch new submits
 
-  const saveToLocal = (data: any[]) => {
-    localStorage.setItem('cand_public_registrations', JSON.stringify(data));
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    let updated;
-    if (registrations.find(r => r.id === formData.id)) {
-      updated = registrations.map(r => r.id === formData.id ? formData : r);
-    } else {
-      updated = [...registrations, { ...formData, id: Date.now(), createDate: new Date().toISOString() }];
+    try {
+      const { updateOnlineRegistration } = await import('./actions');
+      const response = await updateOnlineRegistration(formData.id, formData);
+      if (response && response.success) {
+        alert('Cập nhật thành công!');
+        setView('dashboard');
+        setFormData(null);
+        await fetchRegistrations();
+      } else {
+        alert(response?.error || 'Có lỗi xảy ra!');
+      }
+    } catch (err) {
+      alert('Lỗi kết nối máy chủ!');
     }
-    setRegistrations(updated);
-    saveToLocal(updated);
-    setView('dashboard');
-    setFormData(null);
   };
 
-  const deleteReg = (id: number) => {
+  const deleteReg = async (id: string | number) => {
     if (confirm('Khầy Admin có chắc muốn xóa bản ghi này khỏi hệ thống?')) {
-      const updated = registrations.filter(r => r.id !== id);
-      setRegistrations(updated);
-      saveToLocal(updated);
+      try {
+        const { deleteOnlineRegistration } = await import('./actions');
+        const response = await deleteOnlineRegistration(id.toString());
+        if (response && response.success) {
+          await fetchRegistrations();
+        } else {
+          alert(response?.error || 'Không thể xóa bản ghi!');
+        }
+      } catch (err) {
+        alert('Lỗi kết nối máy chủ!');
+      }
     }
   };
 
@@ -268,7 +290,13 @@ const AdminDangKyManager = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {filteredData.length > 0 ? filteredData.map((reg) => (
+                    {isLoading ? (
+                      <tr>
+                        <td colSpan={6} className="px-6 py-12 text-center text-slate-400 italic">
+                          Đang tải dữ liệu...
+                        </td>
+                      </tr>
+                    ) : filteredData.length > 0 ? filteredData.map((reg) => (
                       <tr key={reg.id} className="hover:bg-slate-50 transition-colors group">
                         <td className="px-4 sm:px-6 py-3 sm:py-4 font-medium text-slate-900 text-sm sm:text-base">{reg.fullName}</td>
                         <td className="px-4 sm:px-6 py-3 sm:py-4 text-slate-600 text-sm sm:text-base">{reg.dob ? new Date(reg.dob).toLocaleDateString('vi-VN') : ''}</td>

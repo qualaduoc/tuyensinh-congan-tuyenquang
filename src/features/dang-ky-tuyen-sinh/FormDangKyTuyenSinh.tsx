@@ -114,36 +114,32 @@ const FormDangKyTuyenSinh = () => {
 
   const [formData, setFormData] = useState<any>(initialForm);
 
-  useEffect(() => {
-    const saved = localStorage.getItem('cand_public_registrations');
-    if (saved) {
-      setRegistrations(JSON.parse(saved));
-    }
-  }, []);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const saveToLocal = (data: any[]) => {
-    localStorage.setItem('cand_public_registrations', JSON.stringify(data));
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.unit) {
       alert("Vui lòng chọn Nơi đăng ký (Công an Xã/Phường)!");
       return;
     }
     
-    let updated;
-    const finalForm = { ...formData, id: formData.id || Date.now(), createDate: new Date().toISOString() };
-    if (registrations.find(r => r.id === formData.id)) {
-      updated = registrations.map(r => r.id === formData.id ? finalForm : r);
-    } else {
-      updated = [...registrations, finalForm];
-    }
-    setRegistrations(updated);
-    saveToLocal(updated);
+    setIsSubmitting(true);
     
-    // Switch to success view instead of print
-    setView('success');
+    // Call server action to submit to database
+    try {
+      const response = await import('./actions').then(m => m.submitOnlineRegistration(formData));
+      
+      if (response && response.success) {
+        setView('success');
+      } else {
+        alert(response?.error || 'Có lỗi xảy ra, vui lòng thử lại!');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Lỗi kết nối máy chủ!');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Handle dynamic subjects based on combination (auto-fill headers logically)
@@ -432,9 +428,10 @@ const FormDangKyTuyenSinh = () => {
                 </button>
                 <button 
                   type="submit"
-                  className="w-full sm:w-auto px-10 py-3 bg-[#8B0000] font-bold text-yellow-300 rounded-xl hover:bg-[#A30000] shadow-[0_4px_10px_rgba(139,0,0,0.3)] transition-all flex items-center justify-center space-x-2 order-1 sm:order-2"
+                  disabled={isSubmitting}
+                  className={`w-full sm:w-auto px-10 py-3 bg-[#8B0000] font-bold text-yellow-300 rounded-xl hover:bg-[#A30000] shadow-[0_4px_10px_rgba(139,0,0,0.3)] transition-all flex items-center justify-center space-x-2 order-1 sm:order-2 ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
                 >
-                  <Send size={20} /> <span className="text-lg">Gửi Đơn Đăng Ký</span>
+                  <Send size={20} /> <span className="text-lg">{isSubmitting ? 'Đang Gửi...' : 'Gửi Đơn Đăng Ký'}</span>
                 </button>
               </div>
             </form>

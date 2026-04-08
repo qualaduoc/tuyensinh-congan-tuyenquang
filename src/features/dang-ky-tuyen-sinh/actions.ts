@@ -1,0 +1,50 @@
+"use server";
+
+import { supabaseAdmin } from '@/utils/supabaseServer';
+
+export async function submitOnlineRegistration(formData: any) {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('online_registrations')
+      .insert([
+        {
+          full_name: formData.fullName,
+          dob: formData.dob || null,
+          cccd: formData.cccd,
+          gender: formData.gender,
+          address: formData.address,
+          ethnicity: formData.ethnicity,
+          candidate_type: formData.candidateType,
+          method: formData.method,
+          uni_choice: formData.uniChoice,
+          college_choice: formData.collegeChoice,
+          combinations: formData.combinations,
+          academic: formData.academic,
+          grad_year: formData.gradYear,
+          officer_rating_2025: formData.officerRating2025,
+          priority_type: formData.priorityType,
+          priority_area: formData.priorityArea,
+          achievements: formData.achievements,
+          bca_exam: formData.bcaExam,
+          physical_test: formData.physicalTest,
+          height: formData.height,
+          weight: formData.weight,
+          family_rep: formData.familyRep,
+          city: formData.city,
+          unit: formData.unit
+        }
+      ])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Database error:', error);
+      return { success: false, error: 'Lỗi lưu vào cơ sở dữ liệu' };
+    }
+
+    return { success: true, data };
+  } catch (err) {
+    console.error('System error:', err);
+    return { success: false, error: 'Lỗi hệ thống' };
+  }
+}
