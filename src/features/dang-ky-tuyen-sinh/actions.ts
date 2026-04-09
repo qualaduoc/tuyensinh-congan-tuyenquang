@@ -4,6 +4,27 @@ import { supabaseAdmin } from '@/utils/supabaseServer';
 
 export async function submitOnlineRegistration(formData: any) {
   try {
+    // 1. Kiểm tra trùng lặp CCCD
+    if (formData.cccd) {
+      const { data: existingRecord, error: checkError } = await supabaseAdmin
+        .from('online_registrations')
+        .select('unit')
+        .eq('cccd', formData.cccd)
+        .maybeSingle(); // maybeSingle returns null if 0 rows, object if 1 row
+
+      if (checkError) {
+        console.error('Check CCCD error:', checkError);
+      }
+
+      if (existingRecord) {
+        return { 
+          success: false, 
+          error: `Số CCCD này đã được đăng ký tại đơn vị: ${existingRecord.unit || 'khác'}. Khầy và Thí sinh vui lòng kiểm tra lại để tránh gửi trùng lặp!` 
+        };
+      }
+    }
+
+    // 2. Thực hiện thêm mới vào database
     const { data, error } = await supabaseAdmin
       .from('online_registrations')
       .insert([
